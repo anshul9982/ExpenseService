@@ -3,8 +3,6 @@ package com.example.expenseservice.service;
 import com.example.expenseservice.dto.ExpenseDto;
 import com.example.expenseservice.entity.Expense;
 import com.example.expenseservice.repository.ExpenseRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +20,8 @@ import java.util.Optional;
 public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
-    private final ObjectMapper objectMapper;
 
-
-    public void saveExpense(ExpenseDto expenseDto){
+    public ExpenseDto saveExpense(ExpenseDto expenseDto){
         setCurrency(expenseDto);
         setAmount(expenseDto);
         setMerchant(expenseDto);
@@ -34,12 +30,27 @@ public class ExpenseService {
         setDescription(expenseDto);
         setDate(expenseDto);
         setTime(expenseDto);
+        
         try {
-            expenseRepository.save(objectMapper.convertValue(expenseDto, Expense.class));
+            Expense expense = Expense.builder()
+                    .userId(expenseDto.getUserId())
+                    .externalId(expenseDto.getExternalId())
+                    .amount(expenseDto.getAmount())
+                    .currency(expenseDto.getCurrency())
+                    .merchant(expenseDto.getMerchant())
+                    .transactionType(expenseDto.getTransactionType())
+                    .balance(expenseDto.getBalance())
+                    .description(expenseDto.getDescription())
+                    .date(expenseDto.getDate())
+                    .time(expenseDto.getTime())
+                    .build();
+            
+            expenseRepository.save(expense);
         }
         catch(Exception e){
             e.printStackTrace();
         }
+        return expenseDto;
     }
 
     public boolean updateExpense(ExpenseDto expenseDto){
@@ -65,15 +76,54 @@ public class ExpenseService {
 
     public List<ExpenseDto> getAllExpensesByDate(String userId, LocalDate date){
        List<Expense> expenseList = expenseRepository.findByUserIdAndDate(userId, date);
-       return objectMapper.convertValue(expenseList, new TypeReference<List<ExpenseDto>>(){});
+       return expenseList.stream().map(expense -> {
+           ExpenseDto dto = new ExpenseDto();
+           dto.setExternalId(expense.getExternalId());
+           dto.setUserId(expense.getUserId());
+           dto.setAmount(expense.getAmount());
+           dto.setCurrency(expense.getCurrency());
+           dto.setMerchant(expense.getMerchant());
+           dto.setTransactionType(expense.getTransactionType());
+           dto.setBalance(expense.getBalance());
+           dto.setDescription(expense.getDescription());
+           dto.setDate(expense.getDate());
+           dto.setTime(expense.getTime());
+           return dto;
+       }).toList();
     }
     public List<ExpenseDto> getAllExpensesBetweenDates(String userId, LocalDate startDate, LocalDate endDate){
        List<Expense> expenseList = expenseRepository.findByUserIdAndDateBetween(userId, startDate, endDate);
-       return objectMapper.convertValue(expenseList, new TypeReference<List<ExpenseDto>>(){});
+       return expenseList.stream().map(expense -> {
+           ExpenseDto dto = new ExpenseDto();
+           dto.setExternalId(expense.getExternalId());
+           dto.setUserId(expense.getUserId());
+           dto.setAmount(expense.getAmount());
+           dto.setCurrency(expense.getCurrency());
+           dto.setMerchant(expense.getMerchant());
+           dto.setTransactionType(expense.getTransactionType());
+           dto.setBalance(expense.getBalance());
+           dto.setDescription(expense.getDescription());
+           dto.setDate(expense.getDate());
+           dto.setTime(expense.getTime());
+           return dto;
+       }).toList();
     }
     public List<ExpenseDto> getAllExpensesByMerchant(String userId, String merchant){
        List<Expense> expenseList = expenseRepository.findByUserIdAndMerchant(userId, merchant);
-       return objectMapper.convertValue(expenseList, new TypeReference<List<ExpenseDto>>(){});
+       return expenseList.stream().map(expense -> {
+           ExpenseDto dto = new ExpenseDto();
+           dto.setExternalId(expense.getExternalId());
+           dto.setUserId(expense.getUserId());
+           dto.setAmount(expense.getAmount());
+           dto.setCurrency(expense.getCurrency());
+           dto.setMerchant(expense.getMerchant());
+           dto.setTransactionType(expense.getTransactionType());
+           dto.setBalance(expense.getBalance());
+           dto.setDescription(expense.getDescription());
+           dto.setDate(expense.getDate());
+           dto.setTime(expense.getTime());
+           return dto;
+       }).toList();
     }
 
     public void setCurrency(ExpenseDto expenseDto){
@@ -145,5 +195,12 @@ public class ExpenseService {
         }
     }
 
-
+    public void setUserId(ExpenseDto dto){
+        if (Objects.isNull(dto.getUserId())){
+            dto.setUserId("NULL");
+        }
+        else{
+            dto.setUserId(dto.getUserId());
+        }
+    }
 }
