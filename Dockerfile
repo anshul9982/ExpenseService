@@ -1,6 +1,11 @@
-# Dockerfiles/expenseservice.Dockerfile
+# Dockerfile for expense-service
+FROM gradle:8.10.0-jdk21 AS build
+WORKDIR /app
+COPY . .
+RUN gradle clean build -x test
+
 FROM eclipse-temurin:21-jre
 WORKDIR /app
-COPY ../jars/expenseservice.jar app.jar
+COPY --from=build /app/build/libs/*.jar app.jar
 EXPOSE 9900
 CMD ["java", "-jar", "app.jar"]
